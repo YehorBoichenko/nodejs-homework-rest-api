@@ -45,6 +45,18 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.delete("/:contactId", async (req, res, next) => {
+  try {
+    const { contactId } = req.params;
+    const result = await contacts.removeContact(contactId);
+    if (!result) {
+      throw RequestError(404);
+    }
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
 router.put("/:contactId", async (req, res, next) => {
   try {
     const { error } = contactsSchema.validate(req.body);
@@ -58,19 +70,6 @@ router.put("/:contactId", async (req, res, next) => {
       throw RequestError(404);
     }
 
-    res.json(result);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.delete("/:contactId", async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
-    const result = await contacts.removeContact(contactId);
-    if (!result) {
-      throw RequestError(404);
-    }
     res.json(result);
   } catch (error) {
     next(error);

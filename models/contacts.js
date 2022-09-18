@@ -19,30 +19,23 @@ const updatedContacts = async (contacts) => {
 
 const removeContact = async (contactId) => {
   const contacts = await listContacts();
-  const contactsIndex = contacts.findIndex(({ id }) => id === contactId);
-
-  if (index === -1) {
-    return null;
-  }
-
-  const [deletedContact] = contacts.splice(contactsIndex, 1);
-
-  await updatedContacts(contacts);
-
-  return deletedContact;
+  const deleteContacts = contacts.filter(({ id }) => id !== contactId);
+  await fs.writeFile(contactsPath, JSON.stringify(deleteContacts));
+  return { message: "contact deleted" };
 };
 
 const addContact = async ({ name, email, phone }) => {
   const contacts = await listContacts();
   const userId = contacts.map((item) => +item.id);
-  const addNewContact = contacts.push({
+  const newContact = {
+    id: String(Math.max(...userId) + 1),
     name,
     email,
     phone,
-    id: String(Math.max(...userId) + 1),
-  });
+  };
+  contacts.push(newContact);
   await updatedContacts(contacts);
-  return addNewContact;
+  return newContact;
 };
 
 const updateContact = async (contactId, { name, email, phone }) => {
@@ -51,7 +44,7 @@ const updateContact = async (contactId, { name, email, phone }) => {
   if (contactsIndex === -1) {
     return null;
   }
-  contacts[contactsIndex] = { contactId, name, email, phone };
+  contacts[contactsIndex] = { id: contactId, name, email, phone };
   await updatedContacts(contacts);
   return contacts[contactsIndex];
 };
