@@ -1,26 +1,23 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { User } = require("../../models/user");
-const { RequestError } = require("../../helpers");
+const { createError } = require("../../helpers");
 const { SECRET_KEY } = process.env;
 
 const login = async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
-    throw RequestError(401, "Wrong email");
+    throw createError(401, "Wrong email");
   }
-  if (bcrypt.compare(password, user.password)) {
+  if (!bcrypt.compare(password, user.password)) {
     console.log(user.password);
-    throw RequestError(401, "Wrong password");
+    throw createError(401, "Wrong password");
   }
   const payload = {
     id: user._id,
   };
   const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
-  if (error) {
-    throw RequestError(400, "missing required fields");
-  }
   await User.findByIdAndUpdate(user._id, { token });
   res.json({
     token,
